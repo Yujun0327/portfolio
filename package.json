@@ -1,0 +1,32 @@
+{
+  "name": "portfolio",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "images:orient": "node scripts/orient-images.mjs",
+    "predev": "node scripts/orient-images.mjs",
+    "prebuild": "node scripts/orient-images.mjs"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.114.0",
+    "@react-three/fiber": "^8.17.10",
+    "@react-three/postprocessing": "^2.16.3",
+    "gsap": "^3.12.5",
+    "lenis": "^1.1.13",
+    "postprocessing": "^6.36.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "simplex-noise": "^4.0.3",
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.3",
+    "leva": "^0.9.35",
+    "vite": "^5.4.10",
+    "vite-imagetools": "^6.2.9"
+  }
+}

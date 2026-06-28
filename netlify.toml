@@ -1,0 +1,15 @@
+# Netlify deploy config for the Vite build.
+# Netlify runs `npm run build`, then serves the static files in `dist/`.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Fallback: serve index.html for any unknown path. Real files (assets, the CV PDF)
+# are served directly — this only catches paths that don't map to a file.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

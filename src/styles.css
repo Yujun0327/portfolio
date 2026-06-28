@@ -1,0 +1,1207 @@
+/* PP Editorial New — drop the font files into /public/fonts/ (see README there).
+   Light (Ultralight) for body copy, Bold (Ultrabold) for titles. Falls back to a
+   serif so the layout still reads if the files aren't present yet. */
+@font-face {
+  font-family: 'PP Editorial New';
+  src: url('/fonts/PPEditorialNew-Ultralight.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Editorial New';
+  src: url('/fonts/PPEditorialNew-Ultrabold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Clash Display — used on the project tags */
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Semibold.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  background: #000;
+}
+
+body {
+  overflow: hidden;
+  color: #fff;
+  font-family: 'PP Editorial New', 'Times New Roman', Georgia, serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+canvas {
+  display: block;
+}
+
+/* ---- DOM overlay (sits above the canvas, never blocks scroll) ---- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 18; /* above the tag layer so the navbar/submenu stay clickable */
+  pointer-events: none;
+  padding: 28px 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  mix-blend-mode: difference; /* stays legible over white lines */
+}
+
+.overlay__top {
+  display: flex;
+  align-items: center;
+}
+.overlay__home {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+}
+.overlay__mark {
+  display: inline-flex;
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+.overlay__mark svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+.overlay__title {
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.overlay__beats {
+  position: absolute;
+  right: 34px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  text-align: right;
+}
+.overlay__beat {
+  pointer-events: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-align: right;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+.overlay__beat:hover {
+  opacity: 0.8;
+}
+.overlay__beat.is-active {
+  opacity: 0.95;
+}
+
+/* chevron + hover submenu (Miscellaneous / Award / Contact) */
+.overlay__more {
+  position: relative;
+  pointer-events: auto;
+  margin-top: 4px;
+  display: flex;
+  justify-content: flex-end;
+}
+.overlay__chev {
+  display: inline-flex;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.overlay__chev svg {
+  width: 16px;
+  height: 16px;
+}
+.overlay__more:hover .overlay__chev {
+  opacity: 0.85;
+  transform: translateY(2px);
+}
+.overlay__submenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0;
+  padding-top: 12px; /* transparent bridge so the hover survives the gap */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.overlay__more:hover .overlay__submenu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.overlay__subitem {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  opacity: 0.55;
+  transition: opacity 0.25s ease;
+}
+.overlay__subitem:hover {
+  opacity: 1;
+}
+
+.overlay__hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  opacity: 0.55;
+}
+
+.overlay__arrow {
+  display: inline-block;
+  animation: bob 1.8s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+/* ---- Intro burst overlay ---- */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* never swallow scroll — events pass to the canvas */
+  transition: opacity 1.1s ease;
+}
+
+.intro__card {
+  width: min(46vmin, 380px);
+  height: min(46vmin, 380px);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+/* real project logo flashed during the intro burst */
+.intro__logo {
+  width: min(46vmin, 380px);
+  height: min(46vmin, 380px);
+  object-fit: contain;
+  display: block;
+}
+
+.intro__name {
+  position: relative;
+  text-align: center;
+  animation: impact 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.intro__name h1 {
+  font-size: clamp(32px, 6.5vw, 78px);
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.intro__name p {
+  margin-top: 12px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+
+.intro__name .intro__hook {
+  margin: 16px auto 0;
+  font-size: 13px;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  font-style: italic;
+  white-space: nowrap;
+  opacity: 0.5;
+}
+
+.intro__ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: ring-out 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* opacity is driven by scroll in JS — animate only the entrance pop here */
+@keyframes impact {
+  0% {
+    transform: scale(1.18);
+    filter: blur(6px);
+  }
+  100% {
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes ring-out {
+  0% {
+    width: 24px;
+    height: 24px;
+    opacity: 0.9;
+  }
+  100% {
+    width: 460px;
+    height: 460px;
+    opacity: 0;
+  }
+}
+
+/* ---- Project tags (3D glass map-pin) ---- */
+.tag-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  perspective: 1100px;
+  font-family: 'Clash Display', 'PP Editorial New', sans-serif;
+}
+
+.tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  z-index: 1;
+  transform-origin: 50% 100%; /* lean pivots on the pin tip */
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+  transition: opacity 0.4s ease;
+}
+/* a hovered tag (even one behind others) pops to the front */
+.tag:hover {
+  z-index: 40;
+}
+
+/* the glass slab's underside — gives it real rounded thickness */
+.tag__thick {
+  position: absolute;
+  inset: 0;
+  border-radius: 34px;
+  transform: translateY(10px);
+  background: linear-gradient(rgba(198, 198, 222, 0.55), rgba(150, 150, 182, 0.5));
+  box-shadow: 0 14px 26px -12px rgba(34, 34, 60, 0.42);
+}
+
+/* the thick puffy glass shell that envelops the picture */
+.tag__glass {
+  position: relative;
+  pointer-events: auto;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 11px;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 34px;
+  color: #1b1b22;
+  font-family: inherit; /* buttons don't inherit font by default */
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.22));
+  backdrop-filter: blur(16px) saturate(1.8);
+  -webkit-backdrop-filter: blur(16px) saturate(1.8);
+  box-shadow:
+    0 30px 56px -14px rgba(34, 34, 60, 0.45),
+    0 10px 20px -8px rgba(34, 34, 60, 0.26),
+    inset 0 3px 3px rgba(255, 255, 255, 1),
+    inset 0 -18px 30px rgba(255, 255, 255, 0.42),
+    inset 0 -4px 6px rgba(110, 110, 150, 0.3),
+    inset 0 0 0 1.6px rgba(255, 255, 255, 0.66);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s;
+}
+.tag__glass:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow:
+    0 40px 70px -14px rgba(34, 34, 60, 0.5),
+    0 12px 22px -8px rgba(34, 34, 60, 0.3),
+    inset 0 3px 3px rgba(255, 255, 255, 1),
+    inset 0 -20px 34px rgba(255, 255, 255, 0.5),
+    inset 0 -4px 6px rgba(110, 110, 150, 0.32),
+    inset 0 0 0 1.6px rgba(255, 255, 255, 0.82);
+}
+
+/* iridescent blown-glass tint (pink -> blue) on the shell */
+.tag__irid {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(145deg, rgba(255, 173, 203, 0.42), rgba(206, 196, 255, 0.16) 46%, rgba(166, 205, 255, 0.44));
+  mix-blend-mode: screen;
+}
+/* specular gloss — a tight sun glint (positioned via --gx/--gy toward the sun)
+   plus a soft opposite rim, for that wet-glass 3D look */
+.tag__gloss {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(28% 20% at var(--gx, 26%) var(--gy, 8%), rgba(255, 255, 255, 1), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(100% 70% at var(--gx, 26%) var(--gy, 8%), rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 52%),
+    radial-gradient(90% 60% at calc(100% - var(--gx, 26%)) calc(100% - var(--gy, 8%)), rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 60%);
+}
+
+/* the picture fills the glass; logo + title sit over its centre */
+.tag__pic {
+  position: relative;
+  height: 236px;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow:
+    inset 0 3px 12px rgba(24, 24, 46, 0.3),
+    inset 0 1px 2px rgba(24, 24, 46, 0.4),
+    inset 0 -3px 4px rgba(255, 255, 255, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* soft scrim to lift the logo + title off the picture */
+.tag__scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(72% 56% at 50% 46%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 72%);
+}
+.tag__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: none;
+}
+.tag__logo {
+  width: 56px;
+  height: auto;
+  color: #20202a;
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.8));
+}
+/* real raster logo on a tag — larger than the placeholder mark, contained */
+img.tag__logo--img {
+  width: auto;
+  max-width: 74%;
+  max-height: 116px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 3px rgba(24, 24, 46, 0.28));
+}
+.tag__frame {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.tag__frame.is-on {
+  opacity: 1;
+}
+/* tag thumbnail: decorative teaser — crop to fill, keep all tags uniform */
+img.tag__frame {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.frame-1 { background: linear-gradient(135deg, #f4c8d7, #b9c6f0); }
+.frame-2 { background: linear-gradient(135deg, #cfe0e6, #b8bbe2); }
+.frame-3 { background: linear-gradient(135deg, #f0d7c9, #c7bae7); }
+.frame-4 { background: linear-gradient(135deg, #d7e0f2, #e6c7db); }
+.frame-5 { background: linear-gradient(135deg, #e1d7f2, #c7daec); }
+.frame-6 { background: linear-gradient(135deg, #f2ddd1, #d0daef); }
+
+.tag__dots {
+  position: absolute;
+  bottom: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+}
+.tag__dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.35);
+  transition: background 0.3s;
+}
+.tag__dots i.on {
+  background: rgba(255, 255, 255, 1);
+}
+
+.tag__title {
+  font-size: 21px;
+  font-weight: 300;
+  letter-spacing: 0;
+  color: #1b1b22;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9), 0 0 12px rgba(255, 255, 255, 0.55);
+}
+
+/* ---- Sound control (bottom-left): eq-bars button reveals a volume slider ---- */
+.sound {
+  position: fixed;
+  left: 28px;
+  bottom: 26px;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* the slider panel slides up out of the button when open */
+.sound__panel {
+  height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: height 0.34s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease, margin-bottom 0.34s;
+}
+.sound__panel.is-open {
+  height: 108px;
+  margin-bottom: 9px;
+  opacity: 1;
+}
+.sound__track {
+  position: relative;
+  width: 9px;
+  height: 104px;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  background: rgba(250, 249, 245, 0.4);
+  backdrop-filter: blur(10px) saturate(1.5);
+  -webkit-backdrop-filter: blur(10px) saturate(1.5);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    inset 0 2px 4px rgba(34, 34, 60, 0.18);
+}
+.sound__fill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  border-radius: 6px;
+  background: linear-gradient(#3a3a44, #1b1b22);
+  transition: height 0.08s linear;
+}
+
+/* the eq-bars button (the icon you liked) */
+.sound__btn {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(250, 249, 245, 0.42);
+  backdrop-filter: blur(12px) saturate(1.6);
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+  box-shadow:
+    0 8px 22px rgba(34, 34, 60, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+.sound__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 16px;
+}
+.sound__bars i {
+  width: 3px;
+  height: 5px;
+  border-radius: 2px;
+  background: #1b1b22;
+  opacity: 0.55;
+}
+.sound__btn.is-on .sound__bars i {
+  opacity: 0.9;
+  animation: eq 0.9s ease-in-out infinite;
+}
+.sound__btn.is-on .sound__bars i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.sound__btn.is-on .sound__bars i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes eq {
+  0%, 100% { height: 5px; }
+  50% { height: 15px; }
+}
+
+/* muted (slider at 0): bars flatten + a slash crosses them = "no audio" */
+.sound__btn.is-muted .sound__bars i {
+  height: 5px;
+  opacity: 0.4;
+  animation: none;
+}
+.sound__btn.is-muted::after {
+  content: '';
+  position: absolute;
+  width: 26px;
+  height: 2px;
+  border-radius: 1px;
+  background: #1b1b22;
+  opacity: 0.7;
+  transform: rotate(-45deg);
+}
+
+/* "click to enable sound" hint — trails the cursor at the sun stage, fades on scroll */
+.sound-hint {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 16;
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: 'PP Editorial New', Georgia, serif;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: lowercase;
+  color: #2a2a30;
+  opacity: 0;
+}
+
+/* downward glass pointer (triangle), flush under the shell */
+.tag__tail {
+  position: absolute;
+  left: 50%;
+  bottom: -15px;
+  width: 44px;
+  height: 20px;
+  transform: translateX(-50%);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(206, 196, 255, 0.34));
+  backdrop-filter: blur(12px) saturate(1.7);
+  -webkit-backdrop-filter: blur(12px) saturate(1.7);
+}
+
+/* a "below" tag dangles down from its anchor: pivot at top, pointer points up */
+.tag--below {
+  transform-origin: 50% 0;
+}
+.tag--below .tag__tail {
+  top: -15px;
+  bottom: auto;
+  clip-path: polygon(0 100%, 100% 100%, 50% 0);
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.5), rgba(206, 196, 255, 0.34));
+}
+
+/* ---- Expanded project modal ---- */
+.modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  font-family: 'PP Editorial New', Georgia, serif;
+}
+.modal-root.is-open {
+  pointer-events: auto;
+}
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(243, 241, 234, 0.18);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.modal-root.is-open .modal-backdrop {
+  opacity: 1;
+}
+.modal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(1080px, 88vw);
+  height: min(600px, 80vh);
+  display: flex;
+  overflow: hidden;
+  border-radius: 26px;
+  color: #141414;
+  background: rgba(250, 249, 245, 0.4);
+  backdrop-filter: blur(22px) saturate(1.6);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  box-shadow:
+    0 30px 90px rgba(20, 20, 20, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.92);
+  transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-root.is-open .modal {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.modal__text {
+  flex: 1;
+  padding: 52px 46px;
+  display: flex;
+  flex-direction: column;
+}
+.modal__cat {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 14px;
+}
+.modal__title {
+  font-size: clamp(26px, 3.2vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.modal__blurb {
+  margin-top: 20px;
+  font-size: 15.5px;
+  line-height: 1.7;
+  max-width: 48ch;
+  opacity: 0.85;
+  white-space: pre-line; /* honour paragraph breaks + the awards list */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto; /* long write-ups scroll instead of overflowing the panel */
+}
+.modal__media {
+  flex: 1.15;
+  position: relative;
+  overflow: hidden;
+  border-left: 1px solid rgba(255, 255, 255, 0.4);
+  /* paper letterbox behind contained images (matches the light palette bg) */
+  background: rgba(243, 241, 234, 0.5);
+}
+/* modal photo: show the whole image, no crop (inline style may override to
+   'cover'). padding gives a paper margin and leaves room for the nav dots;
+   box-sizing:border-box (global) keeps object-fit inside the padding. */
+img.modal__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 16px 16px 34px;
+  display: block;
+}
+.modal__frame {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.modal__frame.is-on {
+  opacity: 1;
+}
+.modal__nav {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.modal__nav button {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(20, 20, 20, 0.3);
+}
+.modal__nav button.on {
+  background: rgba(20, 20, 20, 0.85);
+}
+.modal__close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 17px;
+  color: #141414;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 760px) {
+  .modal {
+    flex-direction: column-reverse;
+    height: min(80vh, 640px);
+  }
+  .modal__media {
+    border-left: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .modal__text {
+    padding: 28px 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tag__glass,
+  .modal,
+  .tag__frame,
+  .modal__frame {
+    transition: opacity 0.2s ease;
+  }
+  .tag__glass:hover .tag__sheen {
+    animation: none;
+  }
+}
+
+/* ---------- Night finale: contact constellation ---------- */
+/* Shining star-icons projected into the dusk sky, each tilting toward the cursor.
+   Positions/opacity come from ContactProjector via ui.contactBuffer. */
+.cstar-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 16;
+  pointer-events: none;
+  perspective: 900px;
+  font-family: 'PP Editorial New', Georgia, serif;
+}
+.cstar-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  will-change: transform, opacity;
+  /* steady the 3D cursor-tilt so the text doesn't shimmer mid-rotation */
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+.cstar {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  pointer-events: inherit;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  padding: 4px 6px;
+  cursor: pointer;
+  color: #20222c;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700; /* match "Yujun Piao" — thin weight flickers under the tilt */
+  letter-spacing: 0.015em;
+  white-space: nowrap;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+.cstar:hover { transform: scale(1.05); color: #0c0c14; }
+.cstar__icon {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  color: #15161e;
+  /* the "shine" — soft white-blue star glow */
+  filter:
+    drop-shadow(0 0 3px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 9px rgba(176, 198, 255, 0.7));
+  animation: cstar-twinkle 3.6s ease-in-out infinite;
+}
+.cstar__icon svg { width: 100%; height: 100%; }
+.cstar:hover .cstar__icon {
+  filter:
+    drop-shadow(0 0 5px rgba(255, 255, 255, 1))
+    drop-shadow(0 0 15px rgba(176, 198, 255, 0.95));
+}
+.cstar__text { opacity: 0.82; }
+/* twinkle pulses opacity only (filter is reserved for the static + hover glow) */
+@keyframes cstar-twinkle {
+  0%, 100% { opacity: 0.82; }
+  50% { opacity: 1; }
+}
+.cstar-wrap:nth-child(2) .cstar__icon { animation-delay: 0.6s; }
+.cstar-wrap:nth-child(3) .cstar__icon { animation-delay: 1.2s; }
+.cstar-wrap:nth-child(4) .cstar__icon { animation-delay: 1.8s; }
+.cstar-wrap:nth-child(5) .cstar__icon { animation-delay: 2.4s; }
+.cstar-wrap:nth-child(6) .cstar__icon { animation-delay: 3s; }
+@media (prefers-reduced-motion: reduce) {
+  .cstar__icon { animation: none; }
+}
+
+/* ---------- Night finale: contact form modal ---------- */
+.cmodal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 32;
+  pointer-events: none;
+  font-family: 'PP Editorial New', Georgia, serif;
+}
+.cmodal-root.is-open { pointer-events: auto; }
+.cmodal-root .modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 26, 36, 0.22);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.cmodal-root.is-open .modal-backdrop { opacity: 1; }
+.cmodal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(540px, 90vw);
+  padding: 48px 44px 40px;
+  color: #141414;
+  border-radius: 26px;
+  background: rgba(250, 249, 245, 0.42);
+  backdrop-filter: blur(22px) saturate(1.6);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  box-shadow:
+    0 30px 90px rgba(20, 20, 20, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.92);
+  transition: opacity 0.45s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.cmodal-root.is-open .cmodal {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.cmodal__form {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cmodal__field {
+  font-family: inherit;
+  font-size: 15px;
+  color: #141414;
+  padding: 13px 16px;
+  border: none;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  outline: none;
+  transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+.cmodal__field::placeholder { color: rgba(20, 20, 20, 0.42); }
+.cmodal__field:focus {
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(20, 20, 20, 0.35);
+}
+.cmodal__area { resize: vertical; line-height: 1.6; }
+.cmodal__err { font-size: 13px; color: #8a2b2b; opacity: 0.9; }
+.cmodal__send {
+  align-self: flex-start;
+  margin-top: 4px;
+  font-family: inherit;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: #f4f2ea;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 13px;
+  cursor: pointer;
+  background: rgba(24, 26, 36, 0.86);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+.cmodal__send:hover { transform: translateY(-1px); background: rgba(24, 26, 36, 1); }
+.cmodal__send:disabled { opacity: 0.6; cursor: default; transform: none; }
+.cmodal__sent {
+  margin-top: 26px;
+  font-size: 17px;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+/* ---------- Discovery title cards (one per scene) ---------- */
+/* A "you've discovered a new land" moment: the world softens, a luminous paper
+   bloom rises, the line draws, and the quote pulls into focus — holds, then fades.
+   Mounted with a changing key so the whole reveal restarts on each arrival. */
+.discovery {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-family: 'PP Editorial New', Georgia, serif;
+  color: #15150e;
+  /* container opacity is driven by JS (scroll-gate + timed fade); inner elements
+     carry the dramatic reveal below */
+}
+/* the soft focus-pull + paper bloom behind the words */
+.discovery::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(58% 52% at 50% 45%, rgba(244, 242, 234, 0.66), rgba(244, 242, 234, 0) 72%);
+  backdrop-filter: blur(2.5px);
+  -webkit-backdrop-filter: blur(2.5px);
+  -webkit-mask: radial-gradient(64% 58% at 50% 45%, #000 28%, transparent 78%);
+  mask: radial-gradient(64% 58% at 50% 45%, #000 28%, transparent 78%);
+}
+.discovery__inner {
+  position: relative;
+  max-width: min(840px, 88vw);
+  padding: 0 24px;
+  text-align: center;
+  transform-origin: center;
+  animation: discovery-kenburns 7600ms ease-out forwards; /* slow majestic push */
+}
+.discovery__eyebrow {
+  font-size: clamp(12px, 1.5vw, 16px);
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  opacity: 0;
+  padding-left: 0.5em; /* balance the trailing letter-spacing */
+  animation: discovery-eyebrow 1500ms ease 150ms forwards;
+}
+.discovery__rule {
+  width: 230px;
+  height: 1px;
+  margin: 24px auto 30px;
+  background: currentColor;
+  opacity: 0.45;
+  transform: scaleX(0);
+  animation: discovery-rule 1700ms cubic-bezier(0.16, 1, 0.3, 1) 320ms forwards;
+}
+.discovery__quote {
+  margin: 0;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(22px, 3.4vw, 41px);
+  line-height: 1.36;
+  opacity: 0;
+  filter: blur(12px);
+  transform: translateY(18px);
+  animation: discovery-quote 1900ms cubic-bezier(0.16, 1, 0.3, 1) 520ms forwards;
+}
+.discovery__author {
+  margin-top: 28px;
+  font-size: clamp(14px, 1.6vw, 18px);
+  letter-spacing: 0.1em;
+  opacity: 0;
+  animation: discovery-author 1500ms ease 1200ms forwards;
+}
+
+@keyframes discovery-kenburns {
+  0% { transform: scale(0.965); }
+  100% { transform: scale(1.035); }
+}
+@keyframes discovery-eyebrow {
+  0% { opacity: 0; letter-spacing: 0.95em; }
+  100% { opacity: 0.72; letter-spacing: 0.5em; }
+}
+@keyframes discovery-rule {
+  to { transform: scaleX(1); }
+}
+@keyframes discovery-quote {
+  to { opacity: 0.97; filter: blur(0); transform: translateY(0); }
+}
+@keyframes discovery-author {
+  to { opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discovery::before { backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .discovery__inner { animation: none; }
+  .discovery__eyebrow,
+  .discovery__rule,
+  .discovery__quote,
+  .discovery__author {
+    animation: none;
+    opacity: 0.85;
+    filter: none;
+    transform: none;
+  }
+}
+
+/* ---------- Paper texture (도화지 grain) — toggleable ---------- */
+.paper {
+  position: fixed;
+  inset: 0;
+  z-index: 5; /* over the canvas, under tags(15)/overlay(18) so UI stays crisp */
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 180px 180px;
+  mix-blend-mode: multiply; /* darkens only the fibers → visible paper tooth */
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+.paper.is-on {
+  opacity: 0.6;
+}
+.paper-toggle {
+  position: fixed;
+  right: 24px;
+  bottom: 22px;
+  z-index: 19;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #1c1c16;
+  background: rgba(255, 255, 255, 0.32);
+  box-shadow: inset 0 0 0 1px rgba(20, 20, 20, 0.14);
+  opacity: 0.4;
+  transition: opacity 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+.paper-toggle:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.paper-toggle.is-on {
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(20, 20, 20, 0.3);
+}
+.paper-toggle svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* ---------- CV download — hero (centre) + top-right (gentle) ---------- */
+/* Centre button lives in the hero name block, so it fades with the name. */
+.intro__cv {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 9px 19px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.72;
+  pointer-events: auto;
+  transition: opacity 0.25s ease, transform 0.25s ease, background 0.25s ease;
+}
+.intro__cv:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+.intro__cv svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Top-right button lives in the overlay, so it fades IN as the hero fades OUT. */
+.overlay__cv {
+  position: absolute;
+  top: 28px;
+  right: 34px;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  opacity: 0.5;
+  transition: opacity 0.25s ease;
+}
+.overlay__cv:hover {
+  opacity: 0.95;
+}
+.overlay__cv svg {
+  width: 15px;
+  height: 15px;
+}

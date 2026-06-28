@@ -1,0 +1,22 @@
+# dependencies (Netlify runs `npm ci` to reinstall these)
+node_modules/
+
+# build output (Netlify rebuilds this)
+dist/
+
+# local env files
+*.local
+.env
+.env.*
+!.env.example
+
+# OS / editor cruft
+.DS_Store
+*.swp
+
+# local agent / tooling state
+.claude/
+
+# root-level dev scratch files (not part of the app)
+/_*.mjs
+/_*.png
