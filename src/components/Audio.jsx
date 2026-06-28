@@ -33,7 +33,10 @@ export function Audio() {
     const [oceanStart, oceanEnd] = offsetRangeForTag('oceanShowcase')
     return [
       { id: 'mountain', at: 0.09 },
-      { id: 'river', at: 0.4 },
+      // fire as the river-towns scene REVEALS (the elevated overview ≈ where the
+      // Stream nav/discovery card point), not deep in the town travel. Tied to the
+      // live ocean offset so it tracks if weights change.
+      { id: 'river', at: oceanStart * 0.58 },
       { id: 'ocean', at: oceanStart },
       // the final holistic-holistic view (just after the showcase ends)
       { id: 'finale', at: Math.min(0.985, oceanEnd + 0.012) },
